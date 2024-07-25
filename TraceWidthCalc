@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PCB Trace Width Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-image: url(''); /* Replace with the path to your image */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background-color: rgba(102, 51, 153, 0.85);
+      border-radius: 30px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+      padding: 40px;
+      text-align: center;
+    }
+    h2 {
+      color: #fff;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      color: #fff;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: 5px solid #ccc;
+      border-radius: 20px;
+    }
+    button {
+      background-color: #ff6f61;
+      color: #fff;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #ff5546;
+    }
+    p {
+      margin-top: 15px;
+      color: #fff;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>PCB Trace Width Calculator</h2>
+    <label for="current">Total Current (Amps):</label>
+    <input type="number" id="current" step="0.1" min="0.1" value="1">
+    <label for="ambient-temperature">Ambient Temperature (°C):</label>
+    <input type="number" id="ambient-temperature" step="1" min="-40" max="85" value="25">
+    <label for="temperature-rise">Allowable Temperature Rise (°C):</label>
+    <input type="number" id="temperature-rise" step="1" min="5" value="10">
+    <label for="copper-weight">Copper Weight (oz):</label>
+    <input type="number" id="copper-weight" step="0.5" min="0.5" value="1">
+    <label for="layer-type">Layer Type:</label>
+    <select id="layer-type">
+      <option value="internal">Internal Layers</option>
+      <option value="external">External Layers</option>
+    </select>
+    <button onclick="calculateTraceWidth()">Calculate</button>
+    <p>Required Trace Width: <span id="trace-width">Calculating...</span> mm</p>
+  </div>
+
+  <script>
+    function calculateTraceWidth() {
+      const current = parseFloat(document.getElementById('current').value);
+      const ambientTemperature = parseFloat(document.getElementById('ambient-temperature').value);
+      const temperatureRise = parseFloat(document.getElementById('temperature-rise').value);
+      const copperWeight = parseFloat(document.getElementById('copper-weight').value);
+      const layerType = document.getElementById('layer-type').value;
+
+      let k, b, c;
+
+      if (layerType === 'internal') {
+        k = 0.024;
+        b = 0.44;
+        c = 0.725;
+      } else {
+        k = 0.048;
+        b = 0.44;
+        c = 0.725;
+      }
+
+      const ozToGrams = 28.35;
+      const copperWeightGrams = copperWeight * ozToGrams;
+
+      const areaMils2 = Math.pow(current / (k * Math.pow(temperatureRise, b)), 1 / c);
+      const traceWidthMils = areaMils2 / (copperWeight * 1.378);
+      const traceWidthMm = traceWidthMils * 0.0254;
+
+      document.getElementById('trace-width').textContent = traceWidthMm.toFixed(2);
+    }
+  </script>
+</body>
+</html>
